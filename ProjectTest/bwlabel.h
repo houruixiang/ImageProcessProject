@@ -184,8 +184,8 @@ public:
 		labelImg.release();
 		img.convertTo(labelImg, CV_32SC1);
 		Mat mask(rows, cols, CV_8UC1);
-		mask.setTo(0);
-		for (int i = 0; i < rows; i++) {
+		mask.setTo(0);	
+ 		for (int i = 0; i < rows; i++) {
 			int *data = labelImg.ptr<int>(i);
 			uchar *maskPtr = mask.ptr<uchar>(i);
 			for (int j = 0; j < cols; j++) {

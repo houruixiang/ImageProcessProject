@@ -59,6 +59,14 @@ int main(void) {
 
 	_img = image.copy();
 	start = cv::getTickCount();
+	image.colorReduce_mask_bit(_img);
+	duration = 1000.0 * (cv::getTickCount() - start) / cv::getTickFrequency();
+	cout << "The time of colorReduce_mask_bit(ms): " << duration << endl;
+	
+
+
+	_img = image.copy();
+	start = cv::getTickCount();
 	image.colorReduce_oneRepeatTravel_iterator_bit(_img);
 	duration = 1000.0 * (cv::getTickCount() - start) / cv::getTickFrequency();
 	cout << "The time of colorReduce_oneRepeatTravel_iterator_bit(ms): " << duration << endl;
@@ -66,10 +74,18 @@ int main(void) {
 	///image.display_img();
 
 	_img = image.copy();
-	display_img(_img);
+	start = cv::getTickCount();
 	image.sharpen(_img);
-	display_img(_img);
+	duration = 1000.0 * (cv::getTickCount() - start) / cv::getTickFrequency();
+	cout << "The time of sharpen(ms): " << duration << endl;
 
 
+	_img = image.copy();
+	start = cv::getTickCount();
+	image.sharpen2D(_img);
+	duration = 1000.0 * (cv::getTickCount() - start) / cv::getTickFrequency();
+	cout << "The time of sharpen2D(ms): " << duration << endl;
+	
+	
 	return 0;
 }

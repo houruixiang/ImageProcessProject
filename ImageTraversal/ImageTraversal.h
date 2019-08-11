@@ -44,7 +44,7 @@ public:
 	}
 
 	//at<typename>(i,j)
-	void colorReduce_twoRepeatTravel_at(cv::Mat _img, int div = 64) {
+	void colorReduce_twoRepeatTravel_at(cv::Mat& _img, int div = 64) {
 		int rows = img.rows;
 		int cols = img.cols;
 		
@@ -58,7 +58,7 @@ public:
 	}
 
 	// 用指针来遍历图像
-	void colorReduce_twoRepeatTravel_ptr(cv::Mat _img, int div = 64) {
+	void colorReduce_twoRepeatTravel_ptr(cv::Mat& _img, int div = 64) {
 		int rows = img.rows;
 		int cols = img.cols * img.channels();
 		for (int i = 0; i < rows; i++) {
@@ -72,7 +72,7 @@ public:
 
 
 	// 用迭代器来遍历图像
-	void colorReduce_oneRepeatTravel_iterator(cv::Mat _img, int div = 64) {
+	void colorReduce_oneRepeatTravel_iterator(cv::Mat& _img, int div = 64) {
 		cv::Mat_<cv::Vec3b>::iterator in_it = img.begin<cv::Vec3b>();
 		cv::Mat_<cv::Vec3b>::iterator in_iend = img.end<cv::Vec3b>();		
 		cv::Mat_<cv::Vec3b>::iterator out_it = _img.begin<cv::Vec3b>();
@@ -88,7 +88,7 @@ public:
 
 
 	//at<typename>(i,j)
-	void colorReduce_twoRepeatTravel_at_bit(cv::Mat _img, int div = 64) {
+	void colorReduce_twoRepeatTravel_at_bit(cv::Mat& _img, int div = 64) {
 		int rows = img.rows;
 		int cols = img.cols;
 		int n = static_cast<int>(log(static_cast<double>(div) / log(2.0) + 0.5));
@@ -104,7 +104,7 @@ public:
 	}
 
 	// 用指针来遍历图像 这个写法最佳
-	void colorReduce_twoRepeatTravel_ptr_bit(cv::Mat _img, int div = 64) {
+	void colorReduce_twoRepeatTravel_ptr_bit(cv::Mat& _img, int div = 64) {
 		int rows = img.rows;
 		int cols = img.cols * img.channels();
 		int n = static_cast<int>(log(static_cast<double>(div) / log(2.0) + 0.5));
@@ -118,9 +118,19 @@ public:
 			}
 		}
 	}
+	// 用指针来遍历图像 这个写法最佳
+	void colorReduce_mask_bit(cv::Mat& _img, int div = 64) {
+		int rows = img.rows;
+		int cols = img.cols * img.channels();
+		int n = static_cast<int>(log(static_cast<double>(div) / log(2.0) + 0.5));
+		uchar mask = 0xff << n;
+		uchar div2 = div >> 1;
+		_img = (img & cv::Scalar(mask, mask, mask)) + cv::Scalar(div2, div2, div2);
+	}
+
 
 	// 用迭代器来遍历图像
-	void colorReduce_oneRepeatTravel_iterator_bit(cv::Mat _img, int div = 64) {
+	void colorReduce_oneRepeatTravel_iterator_bit(cv::Mat& _img, int div = 64) {
 		cv::Mat_<cv::Vec3b>::iterator in_it = img.begin<cv::Vec3b>();
 		cv::Mat_<cv::Vec3b>::iterator in_iend = img.end<cv::Vec3b>();
 		cv::Mat_<cv::Vec3b>::iterator out_it = _img.begin<cv::Vec3b>();
@@ -165,6 +175,18 @@ public:
 		_img.col(0).setTo(cv::Scalar(0));
 		_img.col(_img.cols - 1).setTo(cv::Scalar(0));
 	}
+
+	void sharpen2D(cv::Mat& _img) {
+		cv::Mat kernel(3, 3, CV_32F, cv::Scalar(0));
+		kernel.at<float>(1, 1) = 5.0;
+		kernel.at<float>(0, 1) = -1.0;
+		kernel.at<float>(2, 1) = -1.0;
+		kernel.at<float>(1, 0) = -1.0;
+		kernel.at<float>(1, 2) = -1.0;
+
+		cv::filter2D(img, _img, img.depth(), kernel);
+	}
+
 
 
 private:
