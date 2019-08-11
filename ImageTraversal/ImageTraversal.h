@@ -1,5 +1,5 @@
 #pragma once
-
+#include <iostream>
 #include <cmath>
 #include <string>
 #include "opencv2/highgui.hpp"
