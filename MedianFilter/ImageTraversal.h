@@ -21,24 +21,32 @@ public:
 	}
 	~ImageTraversal(){
 	}
+	int size() { return img.rows * img.cols; }
+	cv::Mat copy(void) { return img.clone(); }
+	bool recover(void) { 
+		if (isOpened) {
+			img = img_backup.clone();
+			return true;
+		}
+		return false;
+	}
 
 	bool open(void) {
-		img = cv::imread(filename, IMREAD_COLOR);
+		img = cv::imread(filename, IMREAD_GRAYSCALE);
 		if (img.empty()) {
 			std::cout << "Could not open or find the image" << std::endl;
 			isOpened = false;
 			return false;
 		}
-	 
+		img_backup = img.clone();
 		isOpened = true;
 		return true;
 	}
 
-	cv::Mat copy(void) {
-		return img.clone();
-	}
+	
 
-	int size() { return img.rows * img.cols; }
+
+	
 	void display_img(void) {
 		if (!isOpened)  open();
 		namedWindow("Display window", WINDOW_AUTOSIZE); // Create a window for display.
@@ -77,6 +85,9 @@ public:
 
 
 	//灰度图
+	//灰度图像与RGB图像的转变。
+	//RGB[A]转换为灰度：Y = 0.299 * R + 0.587 * G + 0.114 * B;
+	//用cvtColor方法的缺陷就是是的原始图像的对比度丢失，从上面的式子中可以看到。
 	void toGray() {
 		if (img.type() == CV_8UC3) {
 			cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
@@ -137,13 +148,13 @@ public:
 	但也会对图像造成一定的模糊效果，从而丢失一部分细节信息。另外，如果在滤波窗口内的噪声点的个数大于整个窗口内像素的个数，
 	则中值滤波就不能很好的过滤掉噪声。
 
-	彩色图像一般不能在rbg空间内做中值滤波，因此这里处理的是灰度图像
+	彩色图像一般不能在rgb空间内做中值滤波，因此这里处理的是灰度图像
 	*/
-	uchar medianFilter(int row, int col, int kernelSize) {
+	uchar medianFilter(cv::Mat& _img, int row, int col, int kernelSize) {
 		std::vector<uchar> pixels;
 		int radius = kernelSize / 2;
 		for (int y = -radius; y <= radius; y++) {
-			uchar* rowData = img.ptr<uchar>(row+y);
+			uchar* rowData = _img.ptr<uchar>(row+y);
 			for (int x = -radius; x <= radius; x++) {
 				pixels.push_back(rowData[col+x]);
 			}
@@ -153,17 +164,23 @@ public:
 		return pixels[pixels.size() / 2];
 	}
 	// 这个算法效率极其低下
-	void medianFilter(int kernelSize) {
+	void medianFilter(cv::Mat& _img, int kernelSize) {
 		int raduis = kernelSize / 2;
 		// 拓展图像的边界
-		cv::copyMakeBorder(img, img, raduis, raduis, raduis, raduis, cv::BORDER_REFLECT);
-		int rows = img.rows;
-		int cols = img.cols;
+		cv::copyMakeBorder(img, _img, raduis, raduis, raduis, raduis, cv::BORDER_REFLECT);
+		int rows = _img.rows;
+		int cols = _img.cols;
 		for (int y = raduis; y < rows - raduis; y++) {
 			for (int x = raduis; x < cols - raduis; x++) {
-				img.at<uchar>(y, x) = medianFilter(y, x, kernelSize);
+				img.at<uchar>(y-raduis, x-raduis) = medianFilter(_img, y, x, kernelSize);
 			}
 		}
+
+		////边界处理
+		//for (int y = 0; y < raduis; y++) img.row(y).setTo(0);
+		//for (int y = rows - raduis; y < rows; y++) img.row(y).setTo(cv::Scalar(0));
+		//for (int x = 0; x < raduis; x++) img.col(x).setTo(0);
+		//for (int x = cols-raduis; x < cols; x++) img.col(x).setTo(cv::Scalar(0));
 	}
 	
 	/*
@@ -171,20 +188,20 @@ public:
 	但是当噪声出现的概率比较高时，原来的中值滤波算法就不是很有效了。只有增大滤波器窗口尺寸，尽管会使图像变得模糊。 
 	使用自适应中值滤波器的目的就是，根据预设好的条件，动态地改变中值滤波器的窗口尺寸，以同时兼顾去噪声作用和保护细节的效果。 
  	*/
-	uchar adaptiveMedianFilter(int row, int col) {
+	uchar adaptiveMedianFilter(cv::Mat& _img, int row, int col, int kernelSize) {
 		std::vector<uchar> pixels;
-		int raduis = minSize / 2;
-		for (int y = -raduis; y <= row + raduis; y++) {
-			uchar* rowData = img.ptr<uchar>(row + y);
-			for (int x = -raduis; x <= col + raduis; x++) {
-				pixels.push_back(rowData[col + y]);
+		int raduis = kernelSize / 2;
+		for (int y = -raduis; y <= raduis; y++) {
+			uchar* rowData = _img.ptr<uchar>(row + y);
+			for (int x = -raduis; x <= raduis; x++) {
+				pixels.push_back(rowData[col + x]);
 			}
 		}
 		sort(pixels.begin(), pixels.end());
 		auto min = pixels.front();
 		auto max = pixels.back();
 		auto mid = pixels[pixels.size() / 2];
-		auto zxy = img.at<uchar>(row, col);
+		auto zxy = _img.at<uchar>(row, col);
 
 		if (min < mid && mid < max) { //mid 非椒盐
 			if (min < zxy && zxy < max) //hold
@@ -193,24 +210,30 @@ public:
 				return mid;
 		}
 		else {
-			minSize += 2;
-			if (minSize <= maxSize)
-				return adaptiveMedianFilter(row, col);
+			kernelSize += 2;
+			if (kernelSize <= maxSize)
+				return adaptiveMedianFilter(_img, row, col, kernelSize);
 			else
 				return mid;
 		}
 	}
-	void adaptiveMedianFilter() {
+	void adaptiveMedianFilter(cv::Mat& _img) {
 		int raduis = maxSize / 2;
 		// 拓展图像的边界
-		cv::copyMakeBorder(img, img, raduis, raduis, raduis, raduis, cv::BORDER_REFLECT);
+		cv::copyMakeBorder(img, _img, raduis, raduis, raduis, raduis, cv::BORDER_REFLECT);
 		int rows = img.rows;
 		int cols = img.cols;
 		for (int y = raduis; y < rows - raduis; y++) {
 			for (int x = raduis; x < cols - raduis; x++) {
-				img.at<uchar>(y, x) = adaptiveMedianFilter(y, x);
+				img.at<uchar>(y- raduis, x- raduis) = adaptiveMedianFilter(_img, y, x, minSize);
 			}
 		}
+
+		////边界处理
+		//for (int y = 0; y < raduis; y++) img.row(y).setTo(0);
+		//for (int y = rows - raduis; y < rows; y++) img.row(y).setTo(cv::Scalar(0));
+		//for (int x = 0; x < raduis; x++) img.col(x).setTo(0);
+		//for (int x = cols - raduis; x < cols; x++) img.col(x).setTo(cv::Scalar(0));
 	}
 
 private:
@@ -218,4 +241,5 @@ private:
 	bool isOpened;
 	string filename;
 	cv::Mat img;
+	cv::Mat img_backup;
 };
