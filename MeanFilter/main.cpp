@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include "ImageTraversal.h"
+ 
 
 
 int main(void) {
@@ -42,7 +43,7 @@ int main(void) {
 
 	image.recover();
 	start = cv::getTickCount();
-	image.GaussFilter(_img, kernelSize, 10000);
+	image.GaussFilter(_img, kernelSize, 1);
 	duration = 1000.0 * (cv::getTickCount() - start) / cv::getTickFrequency();
 	cout << "The time of GaussFilter(ms): " << duration << endl;
 	image.display_img();
