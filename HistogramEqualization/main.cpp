@@ -3,9 +3,9 @@
 #include <string>
 #include "ImageTraversal.h"
 
-
-int main(void) {
-
+ int main(void) {
+  
+   
 	cv::String fpath = "./../../img/lena.jpg";
 	ImageTraversal image = ImageTraversal(fpath);
 	image.open();

@@ -20,6 +20,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "肤色检测", "肤色检�
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HistogramEqualization", "HistogramEqualization\HistogramEqualization.vcxproj", "{99861F5A-3928-4D8B-80BA-97C14A9FBE9C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "大津法OSTU", "大津法OSTU\大津法OSTU.vcxproj", "{A0798EC5-72A8-4461-902E-C6B47E8A3C9A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -84,6 +86,14 @@ Global
 		{99861F5A-3928-4D8B-80BA-97C14A9FBE9C}.Release|x64.Build.0 = Release|x64
 		{99861F5A-3928-4D8B-80BA-97C14A9FBE9C}.Release|x86.ActiveCfg = Release|Win32
 		{99861F5A-3928-4D8B-80BA-97C14A9FBE9C}.Release|x86.Build.0 = Release|Win32
+		{A0798EC5-72A8-4461-902E-C6B47E8A3C9A}.Debug|x64.ActiveCfg = Debug|x64
+		{A0798EC5-72A8-4461-902E-C6B47E8A3C9A}.Debug|x64.Build.0 = Debug|x64
+		{A0798EC5-72A8-4461-902E-C6B47E8A3C9A}.Debug|x86.ActiveCfg = Debug|Win32
+		{A0798EC5-72A8-4461-902E-C6B47E8A3C9A}.Debug|x86.Build.0 = Debug|Win32
+		{A0798EC5-72A8-4461-902E-C6B47E8A3C9A}.Release|x64.ActiveCfg = Release|x64
+		{A0798EC5-72A8-4461-902E-C6B47E8A3C9A}.Release|x64.Build.0 = Release|x64
+		{A0798EC5-72A8-4461-902E-C6B47E8A3C9A}.Release|x86.ActiveCfg = Release|Win32
+		{A0798EC5-72A8-4461-902E-C6B47E8A3C9A}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
