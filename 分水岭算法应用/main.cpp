@@ -19,11 +19,18 @@ int main(void) {
 	cout << "The time of open(ms): " << duration << endl;
 	
 	
-	
-	
-	imshow("Display the processed imgage window", _img); // Show our image inside it.
+	cv::Mat tmp = image.getMarker();
+	imshow("标记图", tmp); // Show our image inside it.
 	waitKey(0); // Wait for a keystroke in the window
 
+
+	cv::Mat marker = image.segmentWaterShed();
+	cv::imshow("分水岭", marker);
+	waitKey();
+
+
+	image.setMaskedImage();
+ 
 
 	return 0;
 }
