@@ -96,6 +96,54 @@ public:
 		destroyAllWindows();//手动销毁全部窗口
 	}
 
+	//分区域FAST
+	void fast_detect_grid(void) {
+		cv::Ptr<cv::FastFeatureDetector> ptrFAST =
+			cv::FastFeatureDetector::create(30);
+		//检测关键点,按网格
+		int vstep = 32;
+		int hstep = 32;
+		int vsize = img.rows / vstep;
+		int hsize = img.cols / hstep;
+		int gridTotal = 20;
+		std::vector<cv::KeyPoint>gridPoints;
+		for (int i = 0; i < vstep; i++) {
+			for (int j = 0; j < hstep; j++) {
+
+				gridPoints.clear();
+				cv::Mat imageROI = img(cv::Rect(j * hsize, i * vsize, hsize, vsize));
+				
+				ptrFAST->detect(imageROI, gridPoints);
+
+				//获得强度最大的topK的FAST特征
+				auto itEnd(gridPoints.end());
+				if (gridPoints.size() > gridTotal) {
+					std::nth_element(gridPoints.begin(), gridPoints.begin() + gridTotal, gridPoints.end(),
+						[](cv::KeyPoint& a, cv::KeyPoint& b) {
+							return a.response > b.response;
+						});
+					itEnd = gridPoints.begin() + gridTotal;
+				}
+				//加入全局特征容器
+				for (auto it = gridPoints.begin(); it != itEnd; it++) {
+					it->pt += cv::Point2f(j*hsize, i*vsize);
+					Keypoints.push_back(*it);
+				}
+			}
+		}
+
+
+		//画出关键点
+		cv::drawKeypoints(img,
+			Keypoints,
+			img,
+			cv::Scalar(255, 0, 255),
+			cv::DrawMatchesFlags::DRAW_OVER_OUTIMG);
+
+		imshow("Fast特征点网格", img);
+		waitKey();
+		destroyAllWindows();//手动销毁全部窗口
+	}
 
 private:
 	bool isOpened;
