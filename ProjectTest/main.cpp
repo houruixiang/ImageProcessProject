@@ -6,7 +6,7 @@
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/highgui.hpp"
 using namespace cv;
-
+ 
 
 
 int main(void)
@@ -46,5 +46,4 @@ int main(void)
 }
 
 
-
-
+ 
